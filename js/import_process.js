@@ -31,35 +31,46 @@ function printObject(o) {
 // });
 
 jQuery(document).ready(function(){
+    // product select 
+    var config = {
+      '.chosen-select'           : {},
+    }
+
     jQuery('#kick_file_upload').ajaxForm({
         url:  ajaxurl,
         type: 'POST',
         success: function(response){
-           //jQuery('.woo_kick_response').html(response);
+           //jQuery('.woo_kick_response').append('kick1');
             response = jQuery.parseJSON(response);
             
             if( response.error ) {
                 jQuery('.woo_kick_response').html(response.msg).addClass('error');
             } else {
-                //jQuery('.woo_kick_response').append('<br>finished:<pre>'+printObject(response));
+
+                window.location = 'admin.php?page=wc-kick-import&kickstep=2';
+                //jQuery('.woo_kick_response').append('<br>finished:<pre>'+printObject(params));
                 //jQuery('.woo_kick_stage').html(response.kicksteppage);
                 
-                jQuery.post(ajaxurl, response, function(page2){
-                    jQuery('.woo_kick_stage').html(page2);
-                });
+                // jQuery.post(ajaxurl, response, function(page2){
+                //     jQuery('.woo_kick_stage').html(page2);
+                //     for (var selector in config) {
+                //       jQuery(selector).chosen(config[selector]);
+                //     }
+                // });
             }
         }
     });
 
-    // product select 
-    var config = {
-      '.chosen-select'           : {},
-    }
-    for (var selector in config) {
-      jQuery(selector).chosen(config[selector]);
-    }
+   
+  jQuery('#kick_file_define').ajaxForm({
+        url:  ajaxurl,
+        type: 'POST',
+        success: function(response){
+            //jQuery('.woo_kick_response').html(response.msg).addClass('error');
+            jQuery('.woo_kick_stage').html('done'+response);
+        }
+    });
+    
 });
-
-
 
 
