@@ -13,8 +13,10 @@ class kickstarter_admin {
         add_action( 'admin_enqueue_scripts', array($this, 'scripts') );
         
         //kick_survey_upload_action
-        add_action('wp_ajax_kick_survey_upload_action', array($this, 'kick_survey_upload_action'));//page1
-        add_action('wp_ajax_kickstarter_define_page', array($this, 'kickstarter_define_page')); //page2
+        add_action('wp_ajax_kick_survey_upload_action', array($this, 'kick_survey_upload_action'));//page 1 action
+        add_action('wp_ajax_kickstarter_define_page', array($this, 'kickstarter_define_page')); //page 2
+        add_action('wp_ajax_kick_data_define_action', array($this, 'kick_data_define_action'));//page 2 action
+
         add_action('wp_ajax_kickstarter_process_survey_data', array($this, 'kickstarter_process_survey_data')); //final
         //add_action('wp_ajax_nopriv_kick_survey_upload_action', array($this, 'kick_survey_upload_action'));
 
@@ -32,6 +34,7 @@ class kickstarter_admin {
         //$screen = get_current_screen();
         //
         //if( $screen->id =='woocommerce_page_wc-kick-import'){
+            wp_enqueue_style('kick-css', WK_CSS.'style.css');
             wp_enqueue_script( 'kick-import-process', WK_JS. 'import_process.js', array('jquery', 'jquery-form'), false, true );
             wp_enqueue_script( 'kick-product-search', WK_JS. 'chosen.jquery.min.js', array(), false, true);
        // }
@@ -52,10 +55,7 @@ class kickstarter_admin {
 
     public function kickstarter_import_page() //page 1
     {
-        global $wp;
-        $kickstep = get_query_var( 'kickstep', 1 );
-        print "I got $kickstep??<br>";
-        if($kickstep == 1){
+        //if($kickstep == 1){
             print "
             <div class='woo_kick_response'></div>
             <div class='woo_kick_stage'>
@@ -67,13 +67,15 @@ class kickstarter_admin {
             <input type='hidden' id='action' name='action' value='kick_survey_upload_action' />
             <input type='file' name='kick_survey_file' id='kick_survey_file' /><br>
             <input type='submit' class='kick_survey_import button-primary' value='Upload Survey' /></form>
-            </div><pre>query:";
+            </div>";
+            print "<br><a class='next_action' href='#'>abcdefg</a>";
             //print_r($wp);
-        } elseif($kickstep == 2) {
-            print "step2";
-        } else {
-            print 'unknown kick step';
-        }
+        // } elseif($kickstep == 2) {
+        //     print "step2";
+        // } else {
+        //     print 'unknown kick step';
+        // }
+            //print "<input type='button' class='crazybuttonthatshouldwork' value='pg1'/>";
     }
 
     public function get_product_search($field_id)
@@ -86,7 +88,7 @@ class kickstarter_admin {
 
         ?>
         <div class="side-by-side clearfix">
-        <select data-placeholder="Choose a Product..." class="chosen-select" multiple style="width:350px;" tabindex="4" id="product_choices">
+        <select data-placeholder="Choose a Product..." class="chosen-select" multiple style="width:350px;" tabindex="4" name="product_choices[]" id="product_choices">
         <option value=""></option>
 
         <?php
@@ -124,16 +126,16 @@ class kickstarter_admin {
         $shipping = '';
 
         foreach ($shipping_fields as $key) {
-             $shipping .= "<label>$key:<select class='chosen-select'  name='$key'>$options</select></label><br>";
+             $shipping .= "<div><label>$key:</label><select class='chosen-select'  name='$key'>$options</select></div>";
         }
 
-        $username = "<label>$key:<select class='chosen-select'  name='username'>$options</select></label><br>";
-        $email = "<label>$key:<select class='chosen-select'  name='email'>$options</select></label><br>";
+        $username = "<div><label>$key:</label><select class='chosen-select'  name='username'>$options</select></div>";
+        $email = "<div><label>$key:</label><select class='chosen-select'  name='email'>$options</select></div>";
 
         print "
         <h1>Step 2</h1>
-        <form id='kick_file_upload' method='POST'>
-        <input type='hidden' id='action' name='action' value='kickstarter_process_survey_data' />
+        <form id='kick_file_define' method='POST'>
+        <input type='hidden' id='action' name='action' value='kick_data_define_action' />
         ".wp_nonce_field('kick_file_define_nonce', 'kick_file_define_nonce')."
         <p>Match each field with its wordpress equivalent</p>
         <h2>User fields</h2>
@@ -158,7 +160,7 @@ class kickstarter_admin {
     }
 
 
-    public function kickstarter_process_survey_data() // final
+    public function kickstarter_process_survey_data() // page 3
     {
         // go through survey data, and defined options
         // create users and order data
@@ -172,6 +174,19 @@ class kickstarter_admin {
         //  if existing kickstarter order exists, get order
         //  else create order
         print 'should review before doing';
+        die();
+    }
+
+    public function kick_data_define_action()
+    {
+        $form = $_POST;
+        $errors = array();
+        foreach ( $form as $key => $value) {
+            
+        }
+        print '<pre>'; print_r($_POST);
+        //$response['action'] =  'kickstarter_process_survey_data';
+        //echo json_encode($response);
         die();
     }
 
