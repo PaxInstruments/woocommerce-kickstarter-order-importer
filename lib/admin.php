@@ -181,12 +181,22 @@ class kickstarter_admin {
     {
         $form = $_POST;
         $errors = array();
+        $uniq = array_count_values(array_values($form));
+        //$errors[] = print_r($uniq, true);
         foreach ( $form as $key => $value) {
-            
+            if (empty($value)) $errors[] = "missing info for $key";
+            if( isset($uniq[$value]) and $uniq[$value]>1) $errors[$value] = "$value is set more then once";
         }
-        print '<pre>'; print_r($_POST);
+
+        $response = array();
+        if(!empty($errors)){
+            $response['error'] = true;
+            $response['msg'] = implode('<br>', array_values($errors));
+        } else {
+            $response['action'] =  'kickstarter_process_survey_data';
+        }
         //$response['action'] =  'kickstarter_process_survey_data';
-        //echo json_encode($response);
+        echo json_encode($response);
         die();
     }
 

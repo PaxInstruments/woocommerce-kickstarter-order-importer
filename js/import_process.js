@@ -98,7 +98,19 @@ jQuery(document).ready(function(){
                 //jQuery('.woo_kick_response').append('before:'+printObject(arr));
             },
             success: function(response){
-                jQuery('.woo_kick_response').append('page3<br>'+response);
+                //jQuery('.woo_kick_response').append('page3<br>'+response);
+                response = jQuery.parseJSON(response);
+                if( response.error ) {
+                    jQuery('.woo_kick_response').html(response.msg).addClass('error');
+                } else {
+                    jQuery('.woo_kick_response').append('ALL IS GOOD<br>'+response);
+                    // jQuery.post(ajaxurl, response, function(page2){
+                    //     jQuery('.woo_kick_stage').html(page2);
+                    //     for (var selector in config) {
+                    //       jQuery(selector).chosen(config[selector]);
+                    //     }
+                    // });
+                }
             },
             error: function(e){
                 jQuery('.woo_kick_response').html('error'+e);
