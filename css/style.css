@@ -1,10 +1,15 @@
-/*
+
 
 label {
     float:left;
     width:14%;
     margin-right:0.5em;
     padding-top:0.2em;
+    margin-bottom: 15px;
     text-align:right;
     font-weight:bold;
-}*/
+}
+
+.clearfix {
+    margin-bottom: 15px;
+}

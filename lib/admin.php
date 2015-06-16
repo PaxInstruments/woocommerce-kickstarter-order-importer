@@ -113,9 +113,9 @@ class kickstarter_admin {
             $options .= "<option value='$field'>$field</option>";
         }
 
-        $shipping_fields = array ( "shipping_first_name",
-            "shipping_last_name",
-            "shipping_company",
+        $shipping_fields = array (
+            "shipping_name", 
+            //"shipping_company",
             "shipping_address_1",
             "shipping_address_2",
             "shipping_city",
@@ -126,11 +126,11 @@ class kickstarter_admin {
         $shipping = '';
 
         foreach ($shipping_fields as $key) {
-             $shipping .= "<div><label>$key:</label><select class='chosen-select'  name='$key'>$options</select></div>";
+             $shipping .= "<div class='clearfix'><label>$key:</label><select class='chosen-select'  name='$key'>$options</select></div>";
         }
 
-        $username = "<div><label>$key:</label><select class='chosen-select'  name='username'>$options</select></div>";
-        $email = "<div><label>$key:</label><select class='chosen-select'  name='email'>$options</select></div>";
+        $username = "<div class='clearfix'><label>Full name:</label><select class='chosen-select'  name='username'>$options</select></div>";
+        $email = "<div class='clearfix'><label>Email:</label><select class='chosen-select'  name='email'>$options</select></div>";
 
         print "
         <h1>Step 2</h1>
@@ -173,7 +173,13 @@ class kickstarter_admin {
                     // WC_API_Customers::update_customer_data(id, shipping_address)
         //  if existing kickstarter order exists, get order
         //  else create order
-        print 'should review before doing';
+        $process = $upload_dir = wp_upload_dir();
+        $filename = $upload_dir['basedir'] . '/survery_import.csv';
+        $this->process_kick->load_data($filename, $_POST['data']);
+
+        print "
+        <h1>Step 3 - Import results</h1>
+        ";
         die();
     }
 
@@ -181,11 +187,18 @@ class kickstarter_admin {
     {
         $form = $_POST;
         $errors = array();
-        $uniq = array_count_values(array_values($form));
-        //$errors[] = print_r($uniq, true);
+        //$uniq = array_count_values(array_values($form));
+        $uniq = array();
+        foreach ($form as $key => $value) {
+            if(is_array($value)) continue;
+            if(!isset($uniq[$value])) $uniq[$value]=0;
+            $uniq[$value]+=0;
+        }
+        $nonce_check = check_ajax_referer('kick_file_define_nonce', 'kick_file_define_nonce');
+        if(! $nonce_check) $errors[] = "Bad nonce";
         foreach ( $form as $key => $value) {
             if (empty($value)) $errors[] = "missing info for $key";
-            if( isset($uniq[$value]) and $uniq[$value]>1) $errors[$value] = "$value is set more then once";
+            if( !is_array($value) and isset($uniq[$value]) and $uniq[$value]>1) $errors[$value] = "$value is set more then once";
         }
 
         $response = array();
@@ -194,6 +207,7 @@ class kickstarter_admin {
             $response['msg'] = implode('<br>', array_values($errors));
         } else {
             $response['action'] =  'kickstarter_process_survey_data';
+            $response['data'] =  $form;
         }
         //$response['action'] =  'kickstarter_process_survey_data';
         echo json_encode($response);

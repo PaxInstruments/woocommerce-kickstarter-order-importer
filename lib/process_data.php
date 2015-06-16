@@ -10,7 +10,79 @@ class process_kick_data
     
     function __construct()
     {
+         // go through survey data, and defined options
+        // create users and order data
+
+        // get reward, ie. item to add to order
+        // for each order 
+        //  get customer by email
+        //      if customer not exist, create customer with shipping address, 
+                    // id = WC_API_Customers::wc_create_new_customer (email, username, passs)
+                    // WC_API_Customers::update_customer_data(id, shipping_address)
+        //  if existing kickstarter order exists, get order
+        //  else create order
+    }
+
+    public function load_data($filename, $map_data)
+    {
+        $errors = array();
         
+        $rc = 1;
+        $csv_data = $this->csv_to_array($filename);
+        foreach ($csv_data as $row) {
+            foreach ($row as $key => $value) {
+                if(!isset($map_data[$key])) continue;
+                $row[$map_data[$key]] = $map_data[$key];
+            }
+            $name_parts = split(' ', $row['username']);
+            $firstname = trim($name_parts[0]);
+            $lastname = '';
+            for ($i=1; $i < count($name_parts); $i++) { 
+                $lastname .= ' '.$name_parts[$i];
+            }
+            $lastname = trim($lastname);
+            $email = trim($row['email']);
+            if(count($name_parts) == 1) $username = $firstname;
+            else $username = $firstname.'.'.$lastname;
+            $row["shipping_first_name"] = $firstname;
+            $row["shipping_last_name"]  = $lastname;
+
+            $user = $this->create_user($email, $username, $row);
+            if(is_wp_error($user)){
+                $errors[] = array($rc, $user);
+            }
+
+            $user = $this->create_order();
+            $rc += 1;
+        }
+
+    }
+
+    private function create_user($email, $username, $data)
+    {
+        $user = get_user_by('email', $email);
+        if(!$user){
+            $user = wc_create_new_customer($email, $username, wp_generate_password());
+        }
+        if(!$user){
+            return $user;
+        }
+        
+        $shipping = array ( "shipping_first_name",
+            "shipping_last_name",
+            //"shipping_company",
+            "shipping_address_1",
+            "shipping_address_2",
+            "shipping_city",
+            "shipping_state",
+            "shipping_postcode",
+            "shipping_country");
+
+        foreach ($shipping as $key) {
+            update_user_meta( $user, $key, $data[$key] );
+        }
+        
+        return $user;
     }
 
     public function FunctionName($value='')

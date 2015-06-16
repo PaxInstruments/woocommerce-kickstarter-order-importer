@@ -55,6 +55,7 @@ jQuery(document).ready(function(){
                 jQuery('.woo_kick_response').html(response.msg).addClass('error');
             } else {
                 jQuery.post(ajaxurl, response, function(page2){
+                    jQuery('.woo_kick_response').html('').removeClass('error');
                     jQuery('.woo_kick_stage').html(page2);
                     for (var selector in config) {
                       jQuery(selector).chosen(config[selector]);
@@ -66,31 +67,9 @@ jQuery(document).ready(function(){
     });
 
 
-    // jQuery(this).delegate('#kick_file_define', 'submit', function() {
-    //     jQuery('.woo_kick_response').html('ajax:'.ajaxurl);
-
-    //     // jQuery('#kick_file_define').ajaxForm({
-    //     //     url:  ajaxurl,
-    //     //     type: 'POST',
-    //     //     success: function(response){
-    //     //         jQuery('.woo_kick_response').html('page3'.response);
-    //     //     }
-    //     // });
-    //     jQuery('#kick_file_define').ajaxSubmit({
-    //         url:  ajaxurl,
-    //         type: 'POST',
-    //         success: function(response){
-    //             jQuery('.woo_kick_response').html('page3'.response);
-    //         }
-    //     });
-    //     return false;
-    // });
 
     jQuery(document).live('submit', '#kick_file_define', function(){
-        //jQuery('.woo_kick_response').append('<br>submit page 2'+printObject(get_form_elements('#kick_file_define')));
-        //jQuery('.woo_kick_response').append('<br>submit page 2'+printObject(jQuery('#product_choices').val()));
-        //return false;
-        //jQuery('#kick_file_upload').submit();
+
         jQuery('#kick_file_define').ajaxSubmit({
             url:  ajaxurl,
             type: 'POST',
@@ -99,17 +78,22 @@ jQuery(document).ready(function(){
             },
             success: function(response){
                 //jQuery('.woo_kick_response').append('page3<br>'+response);
-                response = jQuery.parseJSON(response);
+                try {
+                    response = jQuery.parseJSON(response);
+                } 
+                catch (error){
+                     jQuery('.woo_kick_response').html(response);
+                    return false;
+                }
+                
                 if( response.error ) {
                     jQuery('.woo_kick_response').html(response.msg).addClass('error');
                 } else {
-                    jQuery('.woo_kick_response').append('ALL IS GOOD<br>'+response);
-                    // jQuery.post(ajaxurl, response, function(page2){
-                    //     jQuery('.woo_kick_stage').html(page2);
-                    //     for (var selector in config) {
-                    //       jQuery(selector).chosen(config[selector]);
-                    //     }
-                    // });
+                    //jQuery('.woo_kick_response').append('ALL IS GOOD<br>'+response);
+                    jQuery.post(ajaxurl, response, function(page3){
+                        jQuery('.woo_kick_response').html('').removeClass('error');
+                        jQuery('.woo_kick_stage').html(page3);
+                    });
                 }
             },
             error: function(e){
@@ -119,14 +103,8 @@ jQuery(document).ready(function(){
         return false;
     });
 
-    // $( document ).ajaxError(function() {
-    //   $( ".woo_kick_response" ).append( "Triggered ajaxError handler." );
-    // });
-
-    //  .click();
-
     jQuery('.next_action').on('click', function(){
-        jQuery('.woo_kick_response').append('<br>next action');
+        //jQuery('.woo_kick_response').append('<br>next action');
         var response = {
             action: 'kickstarter_define_page',
             file: '\/var\/www\/html\/wp-content\/uploads\/survery_import.csv'
@@ -142,26 +120,3 @@ jQuery(document).ready(function(){
    
   
     
-//});
-
-
-
-
- // //jQuery('.woo_kick_response').append('kick1');
- //            response = jQuery.parseJSON(response);
-            
- //            if( response.error ) {
- //                jQuery('.woo_kick_response').html(response.msg).addClass('error');
- //            } else {
-
- //                window.location = 'admin.php?page=wc-kick-import&kickstep=2';
- //                jQuery('.woo_kick_response').append('<br>finished:<pre>'+printObject(params));
- //                //jQuery('.woo_kick_stage').html(response.kicksteppage);
-                
-                // jQuery.post(ajaxurl, response, function(page2){
-                //     jQuery('.woo_kick_stage').html(page2);
-                //     for (var selector in config) {
-                //       jQuery(selector).chosen(config[selector]);
-                //     }
-                // });
-      //          }
