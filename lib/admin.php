@@ -31,13 +31,15 @@ class kickstarter_admin {
 
     public function scripts()
     {  
-        //$screen = get_current_screen();
+        $screen = get_current_screen();
+        
         //
-        //if( $screen->id =='woocommerce_page_wc-kick-import'){
+        if( $screen->id =='woocommerce_page_wc-kick-import'){
+            //print "screen:".print_r($screen, true)."<br>";
             wp_enqueue_style('kick-css', WK_CSS.'style.css');
             wp_enqueue_script( 'kick-import-process', WK_JS. 'import_process.js', array('jquery', 'jquery-form'), false, true );
             wp_enqueue_script( 'kick-product-search', WK_JS. 'chosen.jquery.min.js', array(), false, true);
-       // }
+       }
     }
 
     public function add_settings_tab($settings_tabs)
@@ -55,28 +57,49 @@ class kickstarter_admin {
 
     public function kickstarter_import_page() //page 1
     {
-        //if($kickstep == 1){
-            print "
-            <div class='woo_kick_response'></div>
-            <div class='woo_kick_stage'>
-            <h1>Step 1</h1>
-            <form id='kick_file_upload' enctype='multipart/form-data' method='POST'>
-            <input type='hidden' name='MAX_FILE_SIZE' value='100000' /> 
-            ".wp_nonce_field('kick_file_upload_nonce', 'kick_file_upload_nonce')."
-            <p>Upload the cvs file received from the kickstarter survey.</p>
-            <input type='hidden' id='action' name='action' value='kick_survey_upload_action' />
-            <input type='file' name='kick_survey_file' id='kick_survey_file' /><br>
-            <input type='submit' class='kick_survey_import button-primary' value='Upload Survey' /></form>
-            </div>";
-            print "<br><a class='next_action' href='#'>abcdefg</a>";
-            //print_r($wp);
-        // } elseif($kickstep == 2) {
-        //     print "step2";
-        // } else {
-        //     print 'unknown kick step';
-        // }
-            //print "<input type='button' class='crazybuttonthatshouldwork' value='pg1'/>";
+        #global $def_test_data;
+        print "
+        <div class='woo_kick_response'></div>
+        <div class='woo_kick_stage'>
+        <h1>Step 1</h1>
+        <form id='kick_file_upload' enctype='multipart/form-data' method='POST'>
+        <input type='hidden' name='MAX_FILE_SIZE' value='100000' /> 
+        ".wp_nonce_field('kick_file_upload_nonce', 'kick_file_upload_nonce')."
+        <p>Upload the cvs file received from the kickstarter survey.</p>
+        <input type='hidden' id='action' name='action' value='kick_survey_upload_action' />
+        <input type='file' name='kick_survey_file' id='kick_survey_file' /><br>
+        <input type='submit' class='kick_survey_import button-primary' value='Upload Survey' /></form>
+        </div>";
+
+        print "<br><a class='next_action' href='#'>abcdefg</a><pre>";
+
+            $map_data = array( 
+                'action' => 'kick_data_define_action',
+                'kick_file_define_nonce' => 'd0317fa20a',
+                '_wp_http_referer' => '/wp-admin/admin-ajax.php',
+                'username' => 'Backer Name',
+                'email' => 'Email',
+                'shipping_name' => 'Shipping Name',
+                'shipping_address_1' => 'Shipping Address 1',
+                'shipping_address_2' => 'Shipping Address 2',
+                'shipping_city' => 'Shipping City',
+                'shipping_state' => 'Shipping State',
+                'shipping_postcode' => 'Shipping Postal Code',
+                'shipping_country' => 'Shipping Country Code',
+                'product_choices' => array
+                    (
+                        '#1147: Arduino Configuration Shield',
+                        '#1003: Pax Instruments Graphic LCD 132x64 Arduino Shield'
+                    )
+
+            );
+
+        //$res = $this->process_kick->load_data('/var/www/html/wp-content/uploads/survery_import.csv', $map_data);
+        //$res = get_post_meta(1507);
+
+        //print_r($res);
     }
+
 
     public function get_product_search($field_id)
     {
@@ -95,7 +118,7 @@ class kickstarter_admin {
         $products = new WP_Query( $args );
         if ( $products->have_posts() ) : ?>
                 <?php while ( $products->have_posts() ) : $products->the_post(); ?>
-                    <?php  print "<option name='{$products->post->ID}'>#{$products->post->ID}: {$products->post->post_title}</option>";  ?>
+                    <?php  print "<option id='{$products->post->ID} name='{$products->post->ID}'>#{$products->post->ID}: {$products->post->post_title}</option>";  ?>
                 <?php endwhile; // end of the loop. ?>
         <?php endif;
         wp_reset_postdata();
@@ -114,23 +137,32 @@ class kickstarter_admin {
         }
 
         $shipping_fields = array (
-            "shipping_name", 
-            //"shipping_company",
-            "shipping_address_1",
-            "shipping_address_2",
-            "shipping_city",
-            "shipping_state",
-            "shipping_postcode",
-            "shipping_country");
+            "shipping_name" => 'Shipping Name', 
+            //"shipping_company" => '',
+            "shipping_address_1" => 'Shipping Address line 1',
+            "shipping_address_2" => 'Shipping Address line 2',
+            "shipping_city" => 'Shipping City',
+            "shipping_state" => 'Shipping State',
+            "shipping_postcode" => 'Shipping postcode',
+            "shipping_country" => 'Shipping County Code');
 
         $shipping = '';
 
-        foreach ($shipping_fields as $key) {
-             $shipping .= "<div class='clearfix'><label>$key:</label><select class='chosen-select'  name='$key'>$options</select></div>";
+        foreach ($shipping_fields as $key => $value) {
+             $shipping .= "<tr>
+             <th scope='row'><label>$value:</label></th>
+             <td><select class='chosen-select'  name='$key'>$options</select></td>
+             </tr>";
         }
 
-        $username = "<div class='clearfix'><label>Full name:</label><select class='chosen-select'  name='username'>$options</select></div>";
-        $email = "<div class='clearfix'><label>Email:</label><select class='chosen-select'  name='email'>$options</select></div>";
+        $username = "<tr>
+        <th scope='row'><label>Full name:</label></th>
+        <td><select class='chosen-select'  name='username'>$options</select></td>
+        </tr>";
+        $email = "<tr>
+        <th scope='row'><label>Email:</label></th>
+        <td><select class='chosen-select'  name='email'>$options</select></td>
+        </tr>";
 
         print "
         <h1>Step 2</h1>
@@ -139,12 +171,14 @@ class kickstarter_admin {
         ".wp_nonce_field('kick_file_define_nonce', 'kick_file_define_nonce')."
         <p>Match each field with its wordpress equivalent</p>
         <h2>User fields</h2>
+        <table class='form-table'>
         $username
         $email
+        </table>
         <h2>WooCommerce shipping</h2>
-        <div class='side-by-side clearfix'>
+        <table class='form-table'>
         $shipping
-        </div>
+        </table>
         
         <h2>Products to add on order</h2>
         ";
@@ -175,11 +209,13 @@ class kickstarter_admin {
         //  else create order
         $process = $upload_dir = wp_upload_dir();
         $filename = $upload_dir['basedir'] . '/survery_import.csv';
-        $this->process_kick->load_data($filename, $_POST['data']);
 
+        $procesed_data = $this->process_kick->load_data($filename, $_POST['data']);
+        //$code = json_encode($_POST['data']);
         print "
         <h1>Step 3 - Import results</h1>
-        ";
+        <pre>".print_r($procesed_data, true)."</pre>";
+        //print "<pre>".print_r($_POST['data'], true)."</pre>";
         die();
     }
 

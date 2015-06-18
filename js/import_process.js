@@ -48,7 +48,7 @@ jQuery(document).ready(function(){
         url:  ajaxurl,
         type: 'POST',
         success: function(response){
-            jQuery('.woo_kick_response').append('<br>submit page 1');
+            //jQuery('.woo_kick_response').append('<br>submit page 1');
             //jQuery('.woo_kick_response').append(response);
             response = jQuery.parseJSON(response);
             if( response.error ) {
@@ -63,6 +63,7 @@ jQuery(document).ready(function(){
                 });
             }
             //jQuery(document).ready();
+            jQuery('.woo_kick_response').html('').removeClass('error');
         }
     });
 
@@ -74,10 +75,12 @@ jQuery(document).ready(function(){
             url:  ajaxurl,
             type: 'POST',
             beforeSubmit: function(arr, bf, options){
-                //jQuery('.woo_kick_response').append('before:'+printObject(arr));
+                //product_choices
+                //jQuery('.woo_kick_response').append('before:'+jQuery('#product_choices').chosen().val());
+                //return false;
+
             },
             success: function(response){
-                //jQuery('.woo_kick_response').append('page3<br>'+response);
                 try {
                     response = jQuery.parseJSON(response);
                 } 
