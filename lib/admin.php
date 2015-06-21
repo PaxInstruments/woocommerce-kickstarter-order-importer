@@ -211,10 +211,25 @@ class kickstarter_admin {
         $filename = $upload_dir['basedir'] . '/survery_import.csv';
 
         $procesed_data = $this->process_kick->load_data($filename, $_POST['data']);
-        //$code = json_encode($_POST['data']);
+        $stats = '';
+        foreach ($procesed_data[0] as $key => $value) {
+            $stats .= "<b>$key:</b> $value<br>";
+        }
+
+        $errors = '';
+        foreach ($procesed_data[1] as $key => $value) {
+            $errors .= "<b>$key:</b> $value<br>";
+        }
+
         print "
         <h1>Step 3 - Import results</h1>
-        <pre>".print_r($procesed_data, true)."</pre>";
+        <h2>Stats</h2>
+        $stats";
+        if(!empty($errors)){
+            print "
+            <h2>Errors</h2>
+            $errors";
+        }
         //print "<pre>".print_r($_POST['data'], true)."</pre>";
         die();
     }
